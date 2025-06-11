@@ -57,8 +57,9 @@ function Todos() {
   const handleAdd = (todo) => addMutation.mutate(todo);
   const handleDelete = (id) => deleteMutation.mutate(id);
 
+  const isListEmpty = todos.length === 0;
   return (
-    <div>
+    <div className="flex flex-col items-center justify-center mt-15">
       <h2>Todo List</h2>
       <AddTodo onAdd={handleAdd} />
       {isLoading ? (
@@ -71,8 +72,12 @@ function Todos() {
       ) : (
         <TodoList todos={todos} onDelete={handleDelete} />
       )}
-      <button className="btn btn-primary" onClick={handleClearAll}>
-       Clear All Todos
+      <button
+        className="btn btn-primary"
+        onClick={handleClearAll}
+        disabled={isListEmpty}
+      >
+        Clear All Todos
       </button>
     </div>
   );
