@@ -8,18 +8,22 @@ function AddTodo({onAdd}) {
       if (title.trim()) {
           onAdd({ title, completed: false })
           setTitle("")
-      }
+    }
   }
+  
   return (
     <>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
+          className="input input-primary"
           placeholder="Add new Todo"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-        <button type="submit" className="btn btn-primary">Add</button>
+        <button type="submit" className="btn btn-primary">
+          Add
+        </button>
       </form>
     </>
   );

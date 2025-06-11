@@ -6,11 +6,13 @@ import TodoList from "../component/todoList";
 function Todos() {
   const queryClient = useQueryClient();
 
+  function handleClearAll() {
+    queryClient.setQueryData(["todos"], []);
+  };
+
   const {
     data: todos = [],
     isLoading,
-    isError,
-    error,
   } = useQuery({
     queryKey: ["todos"],
     queryFn: fetchTodos,
@@ -18,21 +20,43 @@ function Todos() {
 
   const addMutation = useMutation({
     mutationFn: addTodos,
-    onSuccess: () => queryClient.invalidateQueries(["todos"]),
-    onError: (error) => {
-      console.log("Error adding todo", error)
-    }
+    onMutate: async (newTodo) => {
+      await queryClient.cancelQueries({ queryKey: ["todos"] });
+
+      const previousTodos = queryClient.getQueryData(["todos"]);
+
+      queryClient.setQueryData(["todos"], (old = []) => [
+        ...old,
+        { id: Date.now(), ...newTodo }, 
+      ]);
+
+      return { previousTodos };
+    },
+    onError: (err, newTodo, context) => {
+      queryClient.setQueryData(["todos"], context.previousTodos);
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: deleteTodos,
-    onSuccess: () => queryClient.invalidateQueries(["todos"]),
-    onError: (error) => {
-      console.log("Error deleting todos", error)
-    }
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['todos'] });
+
+      const previousTodos = queryClient.getQueryData(['todos']);
+
+      queryClient.setQueryData(['todos'], (old = []) =>
+        old.filter((todo) => todo.id !== id)
+      );
+
+      return { previousTodos };
+    },
+    onError: (err, id, context) => {
+      queryClient.setQueryData(['todos'], context.previousTodos);
+    },
   });
   const handleAdd = (todo) => addMutation.mutate(todo);
   const handleDelete = (id) => deleteMutation.mutate(id);
+
   return (
     <div>
       <h2>Todo List</h2>
@@ -47,6 +71,9 @@ function Todos() {
       ) : (
         <TodoList todos={todos} onDelete={handleDelete} />
       )}
+      <button className="btn btn-primary" onClick={handleClearAll}>
+       Clear All Todos
+      </button>
     </div>
   );
 }
