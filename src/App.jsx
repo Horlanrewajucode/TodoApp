@@ -1,9 +1,10 @@
+import React from "react";
 import "./App.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "react-router-dom";
-import { router } from "./router";
 import { ErrorBoundary } from "react-error-boundary";
-// import ErrorFallBack from "./component/errorFallBack";
+import { router } from "./router";
+import LoadingScreen from "./loadingScreen";
 
 const queryClient = new QueryClient();
 
@@ -11,7 +12,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary FallbackComponent={ErrorBoundary}>
-        <RouterProvider router={router} />
+        <main role="main" aria-label="Todo App Main Section">
+          <React.Suspense fallback={<LoadingScreen />}>
+            <RouterProvider router={router} />
+          </React.Suspense>
+        </main>
       </ErrorBoundary>
     </QueryClientProvider>
   );

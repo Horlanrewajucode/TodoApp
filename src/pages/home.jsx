@@ -8,8 +8,12 @@ function Home() {
       role="main"
     >
       <header className="flex flex-col items-center justify-center text-center">
-        <h1 className="text-[60px] font-bold italic  font-serif">Todo App📚</h1>
-        <p className="text-[19px] italic font-mono">Be Productive with your Time!!!</p>
+        <h1 className="text-[60px] font-bold italic text-blue-900 font-serif">
+          Todo App📚
+        </h1>
+        <p className="text-[19px] italic font-mono  text-blue-900">
+          Be Productive with your Time!!!
+        </p>
       </header>
 
       <section aria-label="Calendar">

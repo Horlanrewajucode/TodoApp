@@ -2,3 +2,36 @@
 
 @import "tailwindcss";
 @plugin "daisyui";
+
+
+@keyframes dance {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-10px) rotate(5deg);
+  }
+  50% {
+    transform: translateY(0) rotate(-5deg);
+  }
+  75% {
+    transform: translateY(-10px) rotate(5deg);
+  }
+}
+
+.animate-dance {
+  animation: dance 1s infinite;
+}
+
+@keyframes zoomInOut {
+  0%, 100% {
+    transform: scale(0.5);
+  }
+  50% {
+    transform: scale(1);
+  }
+}
+
+.animate-zoom {
+  animation: zoomInOut 3s ease-in-out infinite;
+}
