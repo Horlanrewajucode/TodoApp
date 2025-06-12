@@ -90,8 +90,8 @@ function Todos() {
   const indexOfFirstTodo = indexOfLastTodo - todosPerPage;
   const currentTodos = todos.slice(indexOfFirstTodo, indexOfLastTodo);
   return (
-    <div className="flex flex-col items-center justify-center mt-15">
-      <h2>Todo List</h2>
+    <div className="flex flex-col items-center justify-center mt-15 gap-5">
+      <h2 className="text-[60px] font-bold italic  font-serif">Todo List</h2>
       <AddTodo onAdd={handleAdd} />
       {isLoading ? (
         <div className="flex w-52 flex-col gap-4">
@@ -103,7 +103,7 @@ function Todos() {
       ) : (
         <TodoList todos={currentTodos} onDelete={handleDelete} />
       )}
-      <div>
+      <div className="flex items-center justify-center gap-3">
         <button
           className="btn btn-primary"
           onClick={() => setCurrentPage((prev) => prev - 1)}

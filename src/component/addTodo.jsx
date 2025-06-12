@@ -12,20 +12,23 @@ function AddTodo({onAdd}) {
   }
   
   return (
-    <>
+    <div className="flex flex-row">
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          className="input input-primary"
+          className="input input-primary rounded-tl-2xl rounded-bl-2xl border-0 outline-0 border-b-2 border-l-2 placeholder:italic"
           placeholder="Add new Todo"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-        <button type="submit" className="btn btn-primary">
-          Add
-        </button>
       </form>
-    </>
+      <button
+        type="submit"
+        className="btn bg-blue-900 rounded-tr-2xl rounded-br-2xl text-[18px] text-white font-bold border-0 outline-0"
+      >
+        Add
+      </button>
+    </div>
   );
 }
 
