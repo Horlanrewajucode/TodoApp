@@ -2,20 +2,31 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addTodos, deleteTodos, fetchTodos } from "../api/todos";
 import AddTodo from "../component/addTodo";
 import TodoList from "../component/todoList";
+import { useState } from "react";
 
 function Todos() {
   const queryClient = useQueryClient();
 
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const todosPerPage = 10;
+
   function handleClearAll() {
     queryClient.setQueryData(["todos"], []);
-  };
+    localStorage.removeItem("todos");
+  }
 
-  const {
-    data: todos = [],
-    isLoading,
-  } = useQuery({
+  const { data: todos = [], isLoading } = useQuery({
     queryKey: ["todos"],
-    queryFn: fetchTodos,
+    queryFn: async () => {
+      const stored = localStorage.getItem("todos");
+      if (stored) {
+        return JSON.parse(stored);
+      }
+      const data = await fetchTodos();
+      localStorage.setItem("todos", JSON.stringify(data));
+      return data;
+    },
   });
 
   const addMutation = useMutation({
@@ -24,40 +35,60 @@ function Todos() {
       await queryClient.cancelQueries({ queryKey: ["todos"] });
 
       const previousTodos = queryClient.getQueryData(["todos"]);
+      const newItem = { id: Date.now(), ...newTodo };
+
+      const updatedTodos = [newItem, ...(previousTodos || [])];
 
       queryClient.setQueryData(["todos"], (old = []) => [
+        { id: Date.now(), ...newTodo },
         ...old,
-        { id: Date.now(), ...newTodo }, 
       ]);
+      queryClient.setQueryData(["todos"], updatedTodos);
+
+      localStorage.setItem("todos", JSON.stringify(updatedTodos));
+      setCurrentPage(1);
 
       return { previousTodos };
     },
     onError: (err, newTodo, context) => {
       queryClient.setQueryData(["todos"], context.previousTodos);
+      localStorage.setItem("todos", JSON.stringify(context.previousTodos));
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: deleteTodos,
     onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: ['todos'] });
+      await queryClient.cancelQueries({ queryKey: ["todos"] });
 
-      const previousTodos = queryClient.getQueryData(['todos']);
+      const previousTodos = queryClient.getQueryData(["todos"]);
+      const updatedTodos = (previousTodos || []).filter(
+        (todo) => todo.id !== id
+      );
 
-      queryClient.setQueryData(['todos'], (old = []) =>
+      queryClient.setQueryData(["todos"], updatedTodos);
+
+      queryClient.setQueryData(["todos"], (old = []) =>
         old.filter((todo) => todo.id !== id)
       );
+      localStorage.setItem("todos", JSON.stringify(updatedTodos));
 
       return { previousTodos };
     },
     onError: (err, id, context) => {
-      queryClient.setQueryData(['todos'], context.previousTodos);
+      queryClient.setQueryData(["todos"], context.previousTodos);
+      localStorage.setItem("todos", JSON.stringify(context.previousTodos));
     },
   });
   const handleAdd = (todo) => addMutation.mutate(todo);
   const handleDelete = (id) => deleteMutation.mutate(id);
 
   const isListEmpty = todos.length === 0;
+
+  const totalPages = Math.ceil(todos.length / todosPerPage);
+  const indexOfLastTodo = currentPage * todosPerPage;
+  const indexOfFirstTodo = indexOfLastTodo - todosPerPage;
+  const currentTodos = todos.slice(indexOfFirstTodo, indexOfLastTodo);
   return (
     <div className="flex flex-col items-center justify-center mt-15">
       <h2>Todo List</h2>
@@ -70,8 +101,27 @@ function Todos() {
           <div className="skeleton h-4 w-full"></div>
         </div>
       ) : (
-        <TodoList todos={todos} onDelete={handleDelete} />
+        <TodoList todos={currentTodos} onDelete={handleDelete} />
       )}
+      <div>
+        <button
+          className="btn btn-primary"
+          onClick={() => setCurrentPage((prev) => prev - 1)}
+          disabled={currentPage === 1}
+        >
+          Prev
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          className="btn btn-primary"
+          onClick={() => setCurrentPage((prev) => prev + 1)}
+          disabled={currentPage === totalPages || todos.length === 0}
+        >
+          Next
+        </button>
+      </div>
       <button
         className="btn btn-primary"
         onClick={handleClearAll}

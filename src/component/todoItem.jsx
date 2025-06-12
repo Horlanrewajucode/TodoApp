@@ -50,9 +50,6 @@ function TodoItem({ todo, onDelete }) {
           {editedTitle}
         </span>
       )}
-      {/* <span className={`${isChecked ? "text-red-600" : "text-black"}`}>
-        {todo.title}
-      </span> */}
       <button
         className="btn btn-outline btn-error"
         onClick={() => onDelete(todo.id)}

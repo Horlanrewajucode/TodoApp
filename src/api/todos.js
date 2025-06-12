@@ -3,7 +3,7 @@ import axios from "axios";
 const API_URL = "https://jsonplaceholder.typicode.com/todos";
 
 export async function fetchTodos() {
-  const { data } = await axios.get(API_URL + "?_limit=10");
+  const { data } = await axios.get(API_URL);
   return data;
 }
 
