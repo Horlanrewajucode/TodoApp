@@ -12,11 +12,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary FallbackComponent={ErrorBoundary}>
-        <main role="main" aria-label="Todo App Main Section">
           <React.Suspense fallback={<LoadingScreen />}>
             <RouterProvider router={router} />
           </React.Suspense>
-        </main>
       </ErrorBoundary>
     </QueryClientProvider>
   );
