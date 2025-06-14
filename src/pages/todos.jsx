@@ -3,16 +3,17 @@ import { addTodos, deleteTodos, fetchTodos } from "../api/todos";
 import AddTodo from "../component/addTodo";
 import TodoList from "../component/todoList";
 import { useState } from "react";
+import toast from "react-hot-toast";
+
 
 function Todos() {
   const queryClient = useQueryClient();
-  const [currentPage, setCurrentPage] = useState(1);
-  const todosPerPage = 10;
 
-  function handleClearAll() {
-    queryClient.setQueryData(["todos"], []);
-    localStorage.removeItem("todos");
-  }
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+
+  const todosPerPage = 10;
 
   const { data: todos = [], isLoading } = useQuery({
     queryKey: ["todos"],
@@ -32,16 +33,16 @@ function Todos() {
     onMutate: async (newTodo) => {
       await queryClient.cancelQueries({ queryKey: ["todos"] });
       const previousTodos = queryClient.getQueryData(["todos"]);
-      const newItem = { id: Date.now(), ...newTodo };
-
+      const newItem = { id: Date.now(),completed:false, ...newTodo };
       const updatedTodos = [newItem, ...(previousTodos || [])];
-
+      toast.success("Todo added successfully!")
       queryClient.setQueryData(["todos"], updatedTodos);
       localStorage.setItem("todos", JSON.stringify(updatedTodos));
       setCurrentPage(1);
       return { previousTodos };
     },
     onError: (err, newTodo, context) => {
+      toast.error("Failed to add todo.");
       queryClient.setQueryData(["todos"], context.previousTodos);
       localStorage.setItem("todos", JSON.stringify(context.previousTodos));
     },
@@ -55,25 +56,61 @@ function Todos() {
       const updatedTodos = (previousTodos || []).filter(
         (todo) => todo.id !== id
       );
-
+      toast.success("Todo deleted.");
       queryClient.setQueryData(["todos"], updatedTodos);
       localStorage.setItem("todos", JSON.stringify(updatedTodos));
       return { previousTodos };
     },
     onError: (err, id, context) => {
+      toast.error("Failed to delete todo.");
       queryClient.setQueryData(["todos"], context.previousTodos);
       localStorage.setItem("todos", JSON.stringify(context.previousTodos));
     },
   });
+  const toggleComplete = (id) => {
+    const previousTodos = queryClient.getQueryData(["todos"]) || [];
+    const updatedTodos = previousTodos.map((todo) =>
+      todo.id === id ? { ...todo, completed: !todo.completed } : todo
+    );
+    queryClient.setQueryData(["todos"], updatedTodos);
+    localStorage.setItem("todos", JSON.stringify(updatedTodos));
+    const updated = updatedTodos.find((todo) => todo.id === id);
+    toast.success(
+      `Marked as ${updated.completed ? "completed" : "incomplete"}`
+    );
+  };
+  
 
-  const handleAdd = (todo) => addMutation.mutate(todo);
+  const handleAdd = (todo) => {
+    if (!todo.title.trim()) return;
+    addMutation.mutate(todo)
+  };
   const handleDelete = (id) => deleteMutation.mutate(id);
   const isListEmpty = todos.length === 0;
 
-  const totalPages = Math.ceil(todos.length / todosPerPage);
+  function handleClearAll() {
+    queryClient.setQueryData(["todos"], []);
+    localStorage.removeItem("todos");
+    toast.success("All todos cleared.");
+  }
+
+  const filteredTodos = todos.filter((todo) => {
+    const matchSearch = todo.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchStatus =
+      filterStatus === "all"
+        ? true
+        : filterStatus === "completed"
+        ? todo.completed
+        : !todo.completed;
+    return matchSearch && matchStatus;
+  });
+
+  const totalPages = Math.ceil(filteredTodos.length / todosPerPage);
   const indexOfLastTodo = currentPage * todosPerPage;
   const indexOfFirstTodo = indexOfLastTodo - todosPerPage;
-  const currentTodos = todos.slice(indexOfFirstTodo, indexOfLastTodo);
+  const currentTodos = filteredTodos.slice(indexOfFirstTodo, indexOfLastTodo);
 
   return (
     <main
@@ -97,6 +134,49 @@ function Todos() {
         <h3 id="todo-section-heading" className="sr-only">
           List of todos
         </h3>
+        <aside className="flex flex-col gap-3">
+          <input
+            id="todo-input"
+            type="text"
+            className="input input-primary border-0 outline-0 border-b-2 mb-3"
+            placeholder="Search Todos..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            aria-describedby="todo-help todo-char-count"
+          />
+          <div className=" flex gap-2 mb-4">
+            <button
+              className={`btn ${
+                filterStatus === "all"
+                  ? " bg-blue-900 text-[16px] text-white font-bold border-0 outline-0 hover:bg-blue-950 "
+                  : ""
+              }`}
+              onClick={() => setFilterStatus("all")}
+            >
+              All
+            </button>
+            <button
+              className={`btn ${
+                filterStatus === "completed"
+                  ? " bg-green-900 text-[16px] text-white font-bold border-0 outline-0 hover:bg-green-500 "
+                  : ""
+              }`}
+              onClick={() => setFilterStatus("completed")}
+            >
+              Completed
+            </button>
+            <button
+              className={`btn ${
+                filterStatus === "incomplete"
+                  ? " bg-red-900 text-[16px] text-white font-bold border-0 outline-0 hover:bg-red-500 "
+                  : ""
+              }`}
+              onClick={() => setFilterStatus("incomplete")}
+            >
+              Incomplete
+            </button>
+          </div>
+        </aside>
 
         {isLoading ? (
           <div
@@ -110,7 +190,11 @@ function Todos() {
             <div className="skeleton h-4 w-full"></div>
           </div>
         ) : (
-          <TodoList todos={currentTodos} onDelete={handleDelete} />
+          <TodoList
+            todos={currentTodos}
+            onDelete={handleDelete}
+            onToggleComplete={toggleComplete}
+          />
         )}
       </section>
 

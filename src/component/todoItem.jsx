@@ -1,13 +1,13 @@
 import { useState } from "react";
 
-function TodoItem({ todo, onDelete }) {
-  const [isChecked, setIsChecked] = useState(false);
+function TodoItem({ todo, onDelete, onToggleComplete }) {
+  // const [isChecked, setIsChecked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(todo.title);
 
-  function handleCheckbox() {
-    setIsChecked((prev) => !prev);
-  }
+  // function handleCheckbox() {
+  //   setIsChecked((prev) => !prev);
+  // }
 
   function handleDoubleClick() {
     setIsEditing(true);
@@ -23,12 +23,12 @@ function TodoItem({ todo, onDelete }) {
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
-            className="checkbox checkbox-primary"
-            checked={isChecked}
-            onChange={handleCheckbox}
+            className="checkbox checkbox-primary transition-transform duration-300 hover:scale-105"
+            checked={todo.completed}
+            onChange={() => onToggleComplete(todo.id)}
             disabled={isEditing}
             aria-label={`Mark todo '${editedTitle}' as ${
-              isChecked ? "incomplete" : "complete"
+              todo.completed ? "incomplete" : "complete"
             }`}
           />
           <span className="sr-only">Toggle completion</span>
@@ -61,7 +61,9 @@ function TodoItem({ todo, onDelete }) {
           ) : (
             <span
               className={`font-medium ${
-                isChecked ? "text-red-600" : "text-black"
+                todo.completed
+                  ? "text-red-600 transition-all duration-500 ease-in-out"
+                  : "text-black"
               } cursor-pointer`}
               onDoubleClick={handleDoubleClick}
               tabIndex={0}

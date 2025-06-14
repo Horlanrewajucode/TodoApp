@@ -1,6 +1,6 @@
 import TodoItem from "./todoItem";
 
-function TodoList({ todos, onDelete }) {
+function TodoList({ todos, onDelete, onToggleComplete }) {
   return (
     <section
       aria-label="List of todos"
@@ -8,7 +8,12 @@ function TodoList({ todos, onDelete }) {
     >
       <ul>
         {todos.map((todo) => (
-          <TodoItem key={todo.id} todo={todo} onDelete={onDelete} />
+          <TodoItem
+            key={todo.id}
+            todo={todo}
+            onDelete={onDelete}
+            onToggleComplete={onToggleComplete}
+          />
         ))}
       </ul>
     </section>
