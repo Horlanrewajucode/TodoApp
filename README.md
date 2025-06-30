@@ -52,7 +52,7 @@ A modern, fully-featured Todo List application built with React 19, React Router
 
 - React Router v7 – Page routing with error handling
 
-- TanStack Query v5 – Server state, caching, and mutations
+- React Query v5 – Server state, caching, and mutations
 
 - Tailwind CSS + DaisyUI – Utility-first CSS with elegant UI components
 
