@@ -1,6 +1,13 @@
+import { Props, Todo } from "../api/todos";
 import TodoItem from "./todoItem";
 
-function TodoList({ todos, onDelete, onToggleComplete }) {
+export type TodoListProps = {
+  todos: Todo[];
+  onDelete: (id: string) => void;
+  onToggleComplete: (id: string) => void;
+};
+
+function TodoList({ todos, onDelete, onToggleComplete } : TodoListProps) {
   return (
     <section
       aria-label="List of todos"

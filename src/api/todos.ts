@@ -2,6 +2,22 @@ import axios from "axios";
 
 const API_URL = "https://jsonplaceholder.typicode.com/todos";
 
+export interface Todo {
+  id: string;
+  title: string;
+  completed: boolean;
+  description?: string;
+}
+
+export type TodoInput = Omit<Todo, "id">;
+
+export type Props = {
+  onAdd: (todo: Todo) => void;
+  todo: Todo;
+  onDelete: (id: string) => void;
+  onToggleComplete: (id: string) => void;
+};
+
 // Fetch all todos
 export async function fetchTodos() {
   try {
@@ -14,7 +30,7 @@ export async function fetchTodos() {
 }
 
 // Add a new todo
-export async function addTodos(todo) {
+export async function addTodos(todo : string) {
   try {
     const { data } = await axios.post(API_URL, todo);
     return data;
@@ -25,7 +41,7 @@ export async function addTodos(todo) {
 }
 
 // Delete a todo by ID
-export async function deleteTodos(id) {
+export async function deleteTodos(id : Number) {
   try {
     await axios.delete(`${API_URL}/${id}`);
     return id;

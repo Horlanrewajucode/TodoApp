@@ -1,13 +1,16 @@
 import { useState } from "react";
+import {  Todo } from "../api/todos";
 
-function TodoItem({ todo, onDelete, onToggleComplete }) {
-  // const [isChecked, setIsChecked] = useState(false);
+export type TodoItemProps = {
+  // todos: Todo[];
+  onDelete: (id: string) => void;
+  onToggleComplete: (id: string) => void;
+  todo: Todo;
+};
+
+function TodoItem({ todo, onDelete, onToggleComplete }: TodoItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(todo.title);
-
-  // function handleCheckbox() {
-  //   setIsChecked((prev) => !prev);
-  // }
 
   function handleDoubleClick() {
     setIsEditing(true);

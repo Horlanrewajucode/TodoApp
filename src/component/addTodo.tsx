@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
+import { Props, Todo } from "../api/todos";
 
 const MAX_CHAR = 20;
 
-function AddTodo({ onAdd }) {
+function AddTodo({ onAdd }: Props ) {
   const [title, setTitle] = useState("");
   const [charLeft, setCharLeft] = useState(MAX_CHAR);
   const [error, setError] = useState("");
 
-  function handleChange(e) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
     setTitle(value);
     setCharLeft(MAX_CHAR - value.length);
@@ -19,12 +20,12 @@ function AddTodo({ onAdd }) {
     }
   }
 
-  function handleSubmit(e) {
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!title.trim()) return;
     if (title.length > MAX_CHAR) return;
 
-    onAdd({ title, completed: false });
+    onAdd({ title, completed: false } as unknown as Todo);
     setTitle("");
     setCharLeft(MAX_CHAR);
     setError("");

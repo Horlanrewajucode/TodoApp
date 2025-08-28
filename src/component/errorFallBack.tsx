@@ -1,4 +1,6 @@
-function ErrorFallBack({ error, resetErrorBoundary }) {
+import type { FallbackProps } from "react-error-boundary";
+
+export function ErrorFallBack({ error, resetErrorBoundary }: FallbackProps) {
   return (
     <section
       role="alert"
